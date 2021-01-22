@@ -1,0 +1,5 @@
+- name: server
+  hosts: all
+  become: True
+  roles:
+    - webservers
