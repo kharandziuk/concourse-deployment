@@ -7,9 +7,35 @@
         update_cache: yes
         cache_valid_time: 86400 #One day
 
+
+    - file:
+        path: "/opt/keys/{{ item }}"
+        state: directory
+      loop:
+        - web
+        - worker
+
+    - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+      community.crypto.openssh_keypair:
+        path: /opt/keys/web/session_signing_key
+
+    - name: Generate worker_key
+      community.crypto.openssh_keypair:
+        path: /opt/keys/worker/worker_key
+
+    - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+      community.crypto.openssh_keypair:
+        path: /opt/keys/web/tsa_host_key
+
     - copy:
-        src: "./keys"
-        dest: "/opt"
+        src: /opt/keys/worker/worker_key.pub
+        remote_src: true
+        dest: /opt/keys/web/authorized_worker_keys
+
+    - copy:
+        src: /opt/keys/web/tsa_host_key.pub
+        remote_src: true
+        dest: /opt/keys/worker/
   roles:
     - role: webservers
       project_name: concourse

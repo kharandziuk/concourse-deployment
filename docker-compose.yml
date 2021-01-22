@@ -20,7 +20,7 @@ services:
     ports: ["8080:8080"]
     volumes: ["./keys/web:/concourse-keys"]
     environment:
-      CONCOURSE_EXTERNAL_URL: http://localhost:8080
+      CONCOURSE_EXTERNAL_URL: http://10.2.2.25:8080
       CONCOURSE_POSTGRES_HOST: db
       CONCOURSE_POSTGRES_USER: concourse_user
       CONCOURSE_POSTGRES_PASSWORD: concourse_pass
@@ -42,6 +42,7 @@ services:
     stop_signal: SIGUSR2
     environment:
       CONCOURSE_TSA_HOST: web:2222
+      CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
     logging:
       driver: "json-file"
       options:

@@ -11,11 +11,16 @@ def format(c):
 
 
 @task
+def check_services(c):
+    c.run('vagrant ssh --command "sudo docker service list"')
+
+
+@task
 def orchestration(c):
     c.run("vagrant up")
 
 
-@task
+@task(pre=[], post=[check_services])
 def provision(c):
     SSH_KEY = (
         ROOT_DIR / ".vagrant" / "machines" / "server" / "virtualbox" / "private_key"
@@ -29,16 +34,6 @@ def provision(c):
 def deploy(c):
     orchestration(c)
     provision(c)
-
-
-@task
-def check_services(c):
-    c.run('vagrant ssh --command "sudo docker service list"')
-
-
-@task
-def check_services(c):
-    c.run('vagrant ssh --command "sudo docker service list"')
 
 
 @task
