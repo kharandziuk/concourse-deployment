@@ -1,22 +1,33 @@
 ---
-- name: create user
-  user:
-    name: "{{ user_name }}"
-    groups: users
-    shell: /bin/bash
+- name: Init a new swarm with default parameters
+  docker_swarm:
+    state: present
+    advertise_addr: "10.2.2.25"
 
-- template:
-    src: files/simplehttp.service.j2
-    dest: /etc/systemd/system/simplehttp.service
+- name: remove volumes
+  community.general.docker_prune:
+    volumes: yes
 
-- name: Make sure a service is running
-  systemd:
-    state: started
-    name: simplehttp
-    daemon_reload: true
+- name: Creates backup directory
+  file:
+    path: /var/backups
+    state: directory
 
-- name: Redirect port 80 to {{server_port}} with Rich Rule
-  shell: |
-    iptables -A INPUT -p tcp --dport 80 -j ACCEPT &&
-    iptables -A PREROUTING -t nat -p tcp --dport 80 -j REDIRECT --to-port {{server_port}} &&
-    iptables -t nat -I OUTPUT -p tcp -o lo --dport 80  -j REDIRECT --to-ports {{server_port}}
+- name: Copy file with owner and permissions
+  copy:
+    src: "docker-compose.yml"
+    dest: "/opt/docker-compose.yml"
+
+- name: make service.yml
+  shell: docker-compose -f docker-compose.yml config > service.yml
+  args:
+    chdir: /opt
+
+- name: Deploy stack from a compose file
+  docker_stack:
+    state: present
+    prune: yes
+    name: "{{ project_name }}-stack"
+    with_registry_auth: yes
+    compose:
+      - /opt/service.yml
