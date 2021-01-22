@@ -29,3 +29,23 @@ def provision(c):
 def deploy(c):
     orchestration(c)
     provision(c)
+
+
+@task
+def check_services(c):
+    c.run('vagrant ssh --command "sudo docker service list"')
+
+
+@task
+def check_services(c):
+    c.run('vagrant ssh --command "sudo docker service list"')
+
+
+@task
+def service_logs(c, service=None):
+    c.run(f'vagrant ssh --command "sudo docker service ps --no-trunc {service}"')
+
+
+@task
+def destroy(c):
+    c.run("vagrant destroy -f")
